@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:camel="http://camel.apache.org/schema/spring"
+    xmlns:cxf="http://camel.apache.org/schema/cxf"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="             http://camel.apache.org/schema/cxf http://camel.apache.org/schema/cxf/camel-cxf.xsd      http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd             http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
+    <cxf:cxfEndpoint
+        address="http://stores-soap-demo-svc.apps.ocp.hyperidea.com/StoresWS"
+        endpointName="StoresWSPort" id="wsStores" serviceClass="com.redhat.service.Stores"/>
+    <bean
+        class="org.springframework.boot.context.embedded.ServletRegistrationBean" id="camelServlet">
+        <property name="name" value="CamelServlet"/>
+        <property name="loadOnStartup" value="1"/>
+        <property name="servlet">
+            <bean
+                class="org.apache.camel.component.servlet.CamelHttpTransportServlet" id="camelServlet"/>
+        </property>
+        <property name="urlMappings" value="/*"/>
+    </bean>
+    <camelContext id="camel" xmlns="http://camel.apache.org/schema/spring">
+        <restConfiguration apiContextPath="/api-docs" bindingMode="auto"
+            component="servlet" enableCORS="true">
+            <apiProperty key="api.title" value="Stores"/>
+            <apiProperty key="api.version" value="1.0.0"/>
+            <apiProperty key="api.description" value="Create, Delete and Retrieve Stores"/>
+        </restConfiguration>
+        <rest id="rest-227f06d7-0416-4b08-b4b4-d39f2f10b9cb">
+            <post consumes="application/json"
+                id="post-a1f981ed-85ea-45d4-b7f5-ea8871cfe20e"
+                outType="com.redhat.service.CreateStoreResponse"
+                type="com.redhat.service.CreateStore" uri="store">
+                <param dataType="string" name="user_key" required="true" type="query"/>
+                <to uri="direct:createStore"/>
+            </post>
+            <delete id="delete-6a2e2ba1-0e16-4f88-8fa0-201c96b1a2ec"
+                outType="com.redhat.service.DeleteStoreResponse" uri="store/{storeID}">
+                <param dataType="string" name="user_key" required="true" type="query"/>
+                <to uri="direct:deleteStore"/>
+            </delete>
+            <get bindingMode="json"
+                id="get-9d71c56b-9707-429e-b587-b5b4a170b9d5"
+                outType="com.redhat.service.GetStoreResponse"
+                produces="application/json" uri="store/{storeID}">
+                <param dataType="string" name="user_key" required="true" type="query"/>
+                <to uri="direct:getStore"/>
+            </get>
+            <get bindingMode="json"
+                id="get-029bc54e-08c3-4aff-bc09-3b27f58ea702"
+                outType="com.redhat.service.StoresType"
+                produces="application/json" uri="allstores">
+                <param dataType="string" name="user_key" required="true" type="query"/>
+                <to uri="direct:getAllStores"/>
+            </get>
+        </rest>
+        <route id="createStore">
+            <from id="_from1" uri="direct:createStore"/>
+            <setBody id="_setBody1">
+                <simple>${body.getStore()}</simple>
+            </setBody>
+            <setHeader headerName="soapMethod" id="_setHeader1">
+                <constant>createStore</constant>
+            </setHeader>
+            <to id="_to1" uri="direct:soap"/>
+        </route>
+        <route id="deleteStore">
+            <from id="_from2" uri="direct:deleteStore"/>
+            <setBody id="_setBody2">
+                <simple resultType="int">${header.storeID}</simple>
+            </setBody>
+            <setHeader headerName="soapMethod" id="_setHeader2">
+                <constant>deleteStore</constant>
+            </setHeader>
+            <to id="_to2" uri="direct:soap"/>
+        </route>
+        <route id="getStore">
+            <from id="_from3" uri="direct:getStore"/>
+            <setBody id="_setBody3">
+                <simple resultType="int">${header.storeID}</simple>
+            </setBody>
+            <setHeader headerName="soapMethod" id="_setHeader3">
+                <constant>getStore</constant>
+            </setHeader>
+            <to id="_to3" uri="direct:soap"/>
+        </route>
+        <route id="getAllStores">
+            <from id="_from4" uri="direct:getAllStores"/>
+            <setBody id="_setBody4">
+                <mvel>new Object[0]</mvel>
+            </setBody>
+            <setHeader headerName="soapMethod" id="_setHeader4">
+                <constant>getAllStores</constant>
+            </setHeader>
+            <to id="_to4" uri="direct:soap"/>
+        </route>
+        <route id="soapRoute">
+            <from id="_from5" uri="direct:soap"/>
+            <camel:toD id="tod" uri="cxf:bean:wsStores?defaultOperationName=${header.soapMethod}&amp;exchangePattern=InOut"/>
+            <setBody id="_setBodySoap">
+                <simple>${body[0]}</simple>
+            </setBody>
+            <setHeader headerName="Content-Type" id="_setHeaderContextType">
+                <constant>application/json</constant>
+            </setHeader>
+        </route>
+    </camelContext>
+</beans>
