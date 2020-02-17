@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?><wsdl:definitions xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="http://service.redhat.com/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ns2="http://schemas.xmlsoap.org/soap/http" xmlns:ns1="http://www.rhmart.com/Stores/" name="StoresWSService" targetNamespace="http://service.redhat.com/">
-  <wsdl:import location="http://stores-soap-demo-svc.apps.ocp.hyperidea.com/StoresWS?wsdl=Stores.wsdl" namespace="http://www.rhmart.com/Stores/">
+  <wsdl:import location="http://stores-soap.demo-svc.apps.cp.hyperidea.com/StoresWS?wsdl=Stores.wsdl" namespace="http://www.rhmart.com/Stores/">
     </wsdl:import>
   <wsdl:binding name="StoresWSServiceSoapBinding" type="ns1:Stores">
     <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
@@ -42,7 +42,7 @@
   </wsdl:binding>
   <wsdl:service name="StoresWSService">
     <wsdl:port binding="tns:StoresWSServiceSoapBinding" name="StoresWSPort">
-      <soap:address location="http://stores-soap-demo-svc.apps.ocp.hyperidea.com/StoresWS"/>
+      <soap:address location="http://stores-soap.demo-svc.apps.cp.hyperidea.com/StoresWS"/>
     </wsdl:port>
   </wsdl:service>
 </wsdl:definitions>
